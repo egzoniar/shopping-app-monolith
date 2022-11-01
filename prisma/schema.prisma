@@ -1,0 +1,92 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id        Int     @id @default(autoincrement())
+  name      String  @db.VarChar(255)
+  desc      String  @db.VarChar(255)
+  banner    String  @db.VarChar(255)
+  type      String  @db.VarChar(255)
+  unit      Int
+  price     Float   @db.DoublePrecision
+  available Boolean
+  supplier  String  @db.VarChar(255)
+
+  Cart     Cart?
+  Wishlist Wishlist?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Customer {
+  id       Int    @id @default(autoincrement())
+  email    String @db.VarChar(255)
+  password String @db.VarChar(255)
+  salt     String @db.VarChar(255)
+  phone    String @db.VarChar(255)
+
+  addressId Int     @unique
+  address   Address @relation(fields: [addressId], references: [id])
+
+  Cart     Cart?
+  Wishlist Wishlist?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Order {
+  id Int @id @default(autoincrement())
+
+  amount Int
+  status String @db.VarChar(255)
+  txnId  String @db.VarChar(255)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Address {
+  id Int @id @default(autoincrement())
+
+  Customer Customer?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Cart {
+  id Int @id @default(autoincrement())
+
+  customerId Int      @unique
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  productId Int     @unique
+  product   Product @relation(fields: [productId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Wishlist {
+  id Int @id @default(autoincrement())
+
+  customerId Int      @unique
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  productId Int     @unique
+  product   Product @relation(fields: [productId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
