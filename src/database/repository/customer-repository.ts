@@ -1,11 +1,12 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import { prisma, Prisma, PrismaClient, Product } from "@prisma/client";
 const {
   customer: CustomerModel,
   address: AddressModel,
   wishlist: WishlistModel,
+  product: ProductModel,
 } = new PrismaClient();
 
-class CustomerRepository {
+export class CustomerRepository {
   async createCustomer({
     email,
     password,
@@ -52,11 +53,10 @@ class CustomerRepository {
     }
   }
 
-  async createAddress(
-    customerId: number,
-    { street, postalCode, city, country, Customer }: Prisma.AddressCreateInput
-  ) {
+  async createAddress(customerId: number, address: Prisma.AddressCreateInput) {
     try {
+      const { street, postalCode, city, country } = address;
+
       const customer = await CustomerModel.findUnique({
         where: { id: customerId },
       });
@@ -77,7 +77,7 @@ class CustomerRepository {
     } catch (error) {}
   }
 
-  async findCustomer(email: string) {
+  async findCustomerByEmail(email: string) {
     try {
       const foundedCustomer = await CustomerModel.findFirst({
         where: { email },
@@ -111,11 +111,33 @@ class CustomerRepository {
     }
   }
 
-  async addWishlistItem() {}
+  async addWishlistItem(
+    customerId: number,
+    product: Prisma.ProductCreateInput
+  ) {
+    try {
+      const profile = await CustomerModel.findUnique({
+        where: { id: customerId },
+        include: { Wishlist: true },
+      });
+      if (!profile) throw new Error("Could not find the Customer!");
+
+      const wishlist = await WishlistModel.findUnique({
+        where: { customerId },
+      });
+      if (!wishlist) throw new Error("Could not find the Wishlist!");
+
+      const updatedWishlist = await WishlistModel.update({
+        data: { products: { create: { ...product } } },
+        where: { customerId },
+      });
+      return updatedWishlist;
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   async addCartItem() {}
 
   async addOrderToProfile() {}
 }
-
-export default CustomerRepository;
