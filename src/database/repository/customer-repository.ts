@@ -1,8 +1,12 @@
 import { Prisma, PrismaClient } from "@prisma/client";
-const { customer, address } = new PrismaClient();
+const {
+  customer: CustomerModel,
+  address: AddressModel,
+  wishlist: WishlistModel,
+} = new PrismaClient();
 
 class CustomerRepository {
-  async CreateCustomer({
+  async createCustomer({
     email,
     password,
     phone,
@@ -10,14 +14,14 @@ class CustomerRepository {
     address: addressData,
   }: Prisma.CustomerCreateInput) {
     try {
-      const customerResult = await customer.create({
+      const customerResult = await CustomerModel.create({
         data: {
           email,
           password,
           phone,
           salt,
           address: {
-            create: addressData,
+            create: addressData.create,
           },
         },
       });
@@ -27,12 +31,12 @@ class CustomerRepository {
     }
   }
 
-  async CreateCustomerWithExistingAddress(
+  async createCustomerWithExistingAddress(
     customerData: Prisma.CustomerCreateWithoutAddressInput,
     addressId: number
   ) {
     try {
-      const customerResult = await customer.create({
+      const createdCustomer = await CustomerModel.create({
         data: {
           ...customerData,
           address: {
@@ -42,25 +46,76 @@ class CustomerRepository {
           },
         },
       });
-      return customerResult;
+      return createdCustomer;
     } catch (error) {
       console.log(error);
     }
   }
 
-  async CreateAddress() {}
+  async createAddress(
+    customerId: number,
+    { street, postalCode, city, country, Customer }: Prisma.AddressCreateInput
+  ) {
+    try {
+      const customer = await CustomerModel.findUnique({
+        where: { id: customerId },
+      });
 
-  async FindCustomer() {}
+      if (!customer) throw new Error("Could not find the Customer!");
 
-  async FindCustomerById() {}
+      const createdAddress = await AddressModel.create({
+        data: {
+          street,
+          postalCode,
+          city,
+          country,
+          Customer: { connect: { id: customerId } },
+        },
+      });
 
-  async Wishlist() {}
+      return createdAddress;
+    } catch (error) {}
+  }
 
-  async AddWishlistItem() {}
+  async findCustomer(email: string) {
+    try {
+      const foundedCustomer = await CustomerModel.findFirst({
+        where: { email },
+      });
 
-  async AddCartItem() {}
+      return foundedCustomer;
+    } catch (error) {}
+  }
 
-  async AddOrderToProfile() {}
+  async findCustomerById(id: number) {
+    try {
+      const foundedCustomer = await CustomerModel.findUnique({
+        where: { id },
+        include: { address: true, Wishlist: true, Cart: true, orders: true },
+      });
+      return foundedCustomer;
+    } catch (error) {}
+  }
+
+  async getWishlist(customerId: number) {
+    try {
+      const foundedWishlist = await WishlistModel.findUnique({
+        where: { customerId },
+        include: {
+          products: true,
+        },
+      });
+      return foundedWishlist;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async addWishlistItem() {}
+
+  async addCartItem() {}
+
+  async addOrderToProfile() {}
 }
 
 export default CustomerRepository;

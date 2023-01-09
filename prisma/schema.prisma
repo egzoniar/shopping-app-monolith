@@ -21,8 +21,12 @@ model Product {
   available Boolean
   supplier  String  @db.VarChar(255)
 
-  Cart     Cart?
-  Wishlist Wishlist?
+  Cart Cart?
+
+  Order   Order? @relation(fields: [orderId], references: [id])
+  orderId Int?
+
+  wishlist Wishlist[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -34,6 +38,8 @@ model Customer {
   password String @db.VarChar(255)
   salt     String @db.VarChar(255)
   phone    String @db.VarChar(255)
+
+  orders Order[]
 
   addressId Int     @unique
   address   Address @relation(fields: [addressId], references: [id])
@@ -52,12 +58,21 @@ model Order {
   status String @db.VarChar(255)
   txnId  String @db.VarChar(255)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  items Product[]
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  Customer   Customer? @relation(fields: [customerId], references: [id])
+  customerId Int?
 }
 
 model Address {
   id Int @id @default(autoincrement())
+
+  street     String
+  postalCode String
+  city       String
+  country    String
 
   Customer Customer?
 
@@ -84,8 +99,7 @@ model Wishlist {
   customerId Int      @unique
   customer   Customer @relation(fields: [customerId], references: [id])
 
-  productId Int     @unique
-  product   Product @relation(fields: [productId], references: [id])
+  products Product[] // this property is not added to database table
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
