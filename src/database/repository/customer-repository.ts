@@ -3,7 +3,6 @@ const {
   customer: CustomerModel,
   address: AddressModel,
   wishlist: WishlistModel,
-  product: ProductModel,
 } = new PrismaClient();
 
 export class CustomerRepository {
@@ -75,6 +74,17 @@ export class CustomerRepository {
 
       return createdAddress;
     } catch (error) {}
+  }
+
+  async findAllCustomers() {
+    try {
+      const customers = await CustomerModel.findMany({
+        include: { address: true, Wishlist: true, Cart: true, orders: true },
+      });
+      return customers;
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   async findCustomerByEmail(email: string) {

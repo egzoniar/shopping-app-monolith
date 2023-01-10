@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { CustomerRepository } from "@/database";
 
-class CustomerService {
+export class CustomerService {
   repository: CustomerRepository;
 
   constructor() {
@@ -54,6 +54,15 @@ class CustomerService {
         address
       );
       return createdAddress;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async findCustomers() {
+    try {
+      const customers = await this.repository.findAllCustomers();
+      return customers;
     } catch (error) {
       console.log(error);
     }
