@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { ProductRepository } from "@/database";
+import { ProductRepository } from "../database";
 
 export class ProductService {
   repository: ProductRepository;

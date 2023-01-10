@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { CustomerService } from "@/services";
+import { CustomerService } from "../services/customer-service";
 
 const router = Router();
 
