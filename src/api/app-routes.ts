@@ -11,13 +11,7 @@ app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 app.use(cors());
 app.use(express.static(__dirname + "/public"));
 
-app.use("/api", () => {
-  const router = express.Router();
-
-  router.use("/customer", CustomerRoutes);
-  router.use("/product", ProductRoutes);
-
-  return router;
-});
+app.use("/customer", CustomerRoutes);
+app.use("/product", ProductRoutes);
 
 export default app;

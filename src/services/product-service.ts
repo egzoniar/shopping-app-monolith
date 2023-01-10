@@ -19,7 +19,7 @@ export class ProductService {
 
   async getProducts() {
     try {
-      return this.repository.getProducts();
+      return await this.repository.getProducts();
     } catch (error) {
       console.log(error);
     }

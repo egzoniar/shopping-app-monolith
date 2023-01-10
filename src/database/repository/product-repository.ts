@@ -13,7 +13,7 @@ export class ProductRepository {
 
   async getProducts() {
     try {
-      return ProductModel.findMany();
+      return await ProductModel.findMany();
     } catch (error) {
       console.log(error);
     }
